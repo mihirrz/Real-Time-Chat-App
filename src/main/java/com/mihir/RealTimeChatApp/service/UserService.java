@@ -18,10 +18,14 @@ public class UserService {
 
     // Method to register a new user
     public UserModel registerUser(UserDTO userDTO) {
+
         // Check if username or email already exists
-        if (userRepository.existsByUserName(userDTO.getUserName()) ||
-                userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new IllegalArgumentException("Username or Email already exists.");
+        if(userRepository.existsByUserName(userDTO.getUserName()))
+        {
+            throw new IllegalArgumentException("Username already exists, try a different username.");
+        }
+        if(userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("Email already exists.");
         }
 
         // Encode the user's password before saving it
@@ -35,7 +39,7 @@ public class UserService {
         user.setPhoneNo(userDTO.getPhoneNo());
         user.setPassword(encodedPassword);
 
-        // Save and return the user
+        // Save the user
         return userRepository.save(user);
     }
 

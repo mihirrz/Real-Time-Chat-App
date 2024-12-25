@@ -5,6 +5,7 @@ import com.mihir.RealTimeChatApp.model.UserModel;
 import com.mihir.RealTimeChatApp.response.ApiResponse;
 import com.mihir.RealTimeChatApp.response.ErrorDetails;
 import com.mihir.RealTimeChatApp.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,20 +23,19 @@ public class UserController {
 
     // Register a new user
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<?>> registerUser(@RequestBody UserDTO userDTO, BindingResult bindingResult) {
+    public ResponseEntity<ApiResponse<?>> registerUser(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<ErrorDetails> errorDetailsList = bindingResult.getFieldErrors().stream()
                     .map(fieldError -> new ErrorDetails(fieldError.getField(), fieldError.getDefaultMessage()))
                     .toList();
-
             return ResponseEntity.badRequest().body(ApiResponse.failure("Validation failed", errorDetailsList));
         }
 
         try {
             userService.registerUser(userDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("User created successfully"));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure("Error occurred during user registration", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.failure(e.getMessage()));
         }
     }
 
