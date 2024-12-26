@@ -12,11 +12,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig implements WebMvcConfigurer {
+public class SecurityConfig {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -25,12 +27,14 @@ public class SecurityConfig implements WebMvcConfigurer {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors()  // Apply CORS before any other filter in Spring Security
+                .and()
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/api/users/register", "/api/users/login").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults()); // Enable basic authentication
 
         return http.build();
     }
@@ -45,4 +49,17 @@ public class SecurityConfig implements WebMvcConfigurer {
         );
     }
 
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowCredentials(true);  // Allow credentials (cookies, headers)
+        config.addAllowedOrigin("http://localhost:3000");  // Allow React app origin
+        config.addAllowedHeader("*");  // Allow all headers
+        config.addAllowedMethod("*");  // Allow all HTTP methods
+
+        source.registerCorsConfiguration("/api/**", config);  // Apply CORS to /api endpoints
+        return new CorsFilter(source);
+    }
 }
