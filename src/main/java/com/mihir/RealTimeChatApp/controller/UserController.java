@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:3000" , allowedHeaders = "*")
 public class UserController {
 
     @Autowired
@@ -81,4 +82,20 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure("User not found", e.getMessage()));
         }
     }
+
+    @GetMapping("/getallusers")
+    public ResponseEntity<ApiResponse<?>> getAllUsers() {
+        try {
+            List<UserModel> users = userService.getAllUsers();
+            if(users.isEmpty())
+                return ResponseEntity.ok(ApiResponse.success("No users found in DB", null));
+
+            return ResponseEntity.ok(ApiResponse.success("Users retrieved successfully", users));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.failure("Failed to retrieve users", e.getMessage()));
+        }
+    }
+
+
 }

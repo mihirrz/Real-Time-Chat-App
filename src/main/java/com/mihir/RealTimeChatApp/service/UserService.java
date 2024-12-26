@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
 
@@ -83,4 +85,15 @@ public class UserService {
         }
         userRepository.deleteById(id);
     }
+    public List<UserModel> getAllUsers() {
+        try {
+            return userRepository.findAll();
+        } catch (Exception e) {
+            // Throw a custom exception or return an empty list
+            throw new RuntimeException("An error occurred while fetching the user list.");
+        }
+    }
+
+
+
 }
